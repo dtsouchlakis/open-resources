@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import NavBar from "./components/NavBar";
+import SessionWrapper from "./components/SessionWrapper";
+import { getSession } from "next-auth/react";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -10,13 +13,24 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
+  session,
   children,
 }: Readonly<{
   children: React.ReactNode;
+  session: any;
 }>) {
+  console.log("session", session);
+  session = getSession();
+  console.log("session", session);
+
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
-    </html>
+    <SessionWrapper session={session}>
+      <html lang="en">
+        <body className={inter.className}>
+          <NavBar />
+          {children}
+        </body>
+      </html>
+    </SessionWrapper>
   );
 }
