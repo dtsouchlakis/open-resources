@@ -10,56 +10,65 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+//Some fields are there just for the eventual expansion of the project
 
 model Account {
-  id                 String  @id @default(cuid())
+  uid                String  @id @default(cuid())
   userId             String
   type               String
   provider           String
   providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
+  refresh_token      String? @db.Text
+  access_token       String? @db.Text
   expires_at         Int?
   token_type         String?
   scope              String?
-  id_token           String?  @db.Text
+  id_token           String? @db.Text
   session_state      String?
   oauth_token_secret String?
   oauth_token        String?
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [uid], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
+  @@index([userId])
 }
 
-
 model Session {
-  id           String   @id @default(cuid())
+  uid          String   @id @default(cuid())
   userId       String
   expires      DateTime
   sessionToken String   @unique
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  user         User     @relation(fields: [userId], references: [id])
+  user         User     @relation(fields: [userId], references: [uid])
 }
 
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  accounts      Account[]
-  sessions      Session[]
-  files         File[]
-  holidays      Holiday[]
-  trainings     Training[]
+  uid               String      @id @default(cuid())
+  name              String?
+  email             String?     @unique
+  emailVerified     DateTime?
+  image             String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  passwordHash      String?
+  registrationDate  DateTime
+  accounts          Account[]
+  sessions          Session[]
+  files             File[]
+  employee          Employee?
+  Department        Department? @relation(fields: [departmentUid], references: [uid])
+  departmentUid     String?
+  HolidaysRequested Holiday[]   @relation(name: "RequestedByUser")
+  HolidaysApproved  Holiday[]   @relation(name: "ApprovedByUser")
+  Training          Training[]
+
+  @@index([email])
 }
 
 model VerificationToken {
-  id         String   @id @default(cuid())
+  uid        String   @id @default(cuid())
   identifier String
   token      String   @unique
   expires    DateTime
@@ -69,39 +78,122 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-
-
-
 model File {
-  id        String @id
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  url       String
-  size      Int
-  type      String
+  uid         String    @id
+  name        String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  user        User      @relation(fields: [userId], references: [uid])
+  userId      String
+  url         String
+  size        Int
+  type        String
+  Company     Company?  @relation(fields: [companyUid], references: [uid])
+  companyUid  String?
+  Training    Training? @relation(fields: [trainingUid], references: [uid])
+  trainingUid String?
+
+  @@unique([userId, url])
+  @@index([userId])
 }
 
 model Holiday {
-  id        String @id
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  dateFrom  DateTime
-  dateTo    DateTime
+  uid               String   @id
+  name              String
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  requestedByUser   User     @relation(name: "RequestedByUser", fields: [requestedByUserId], references: [uid])
+  requestedByUserId String
+  dateFrom          DateTime
+  dateTo            DateTime
+  requestedAt       DateTime
+  approvedAt        DateTime
+  approvedByUser    User?    @relation(name: "ApprovedByUser", fields: [approvedByUserId], references: [uid])
+  approvedByUserId  String
+  description       String
+
+  @@unique([requestedByUserId, dateFrom, dateTo])
+  @@index([requestedByUserId])
 }
 
 model Training {
-  id        String @id
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  dateFrom  DateTime
-  dateTo    DateTime
+  uid         String   @id
+  name        String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  user        User     @relation(fields: [userId], references: [uid])
+  userId      String
+  dateFrom    DateTime
+  dateTo      DateTime
+  description String
+  files       File[]
+
+  @@unique([userId, dateFrom, dateTo])
+  @@index([userId])
+}
+
+model Employee {
+  uid             String     @id
+  name            String
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+  user            User       @relation(fields: [userId], references: [uid])
+  userId          String     @unique
+  email           String
+  firstName       String
+  lastName        String
+  dateOfBirth     DateTime
+  gender          String
+  title           String
+  hiredAt         DateTime
+  lastDayWorkedAt DateTime
+  mobile          String
+  phone           String
+  address         String
+  positionTitle   String
+  department      Department @relation(fields: [departmentId], references: [uid])
+  departmentId    String
+  manager         Employee   @relation(name: "Subordinate", fields: [subordinateId], references: [uid])
+  managerId       String
+  image           String
+  bio             String
+  subordinate     Employee?  @relation(name: "Subordinate")
+  subordinateId   String     @unique
+  Company         Company?   @relation(fields: [companyUid], references: [uid])
+  companyUid      String?
+
+  @@index([userId, email, firstName, lastName, departmentId, managerId, subordinateId])
+}
+
+model Department {
+  uid            String     @id
+  departmentName String
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+  users          User[]
+  employees      Employee[]
+  Company        Company?   @relation(fields: [companyUid], references: [uid])
+  companyUid     String?
+
+  @@index([departmentName])
+}
+
+model Company {
+  uid            String       @id
+  name           String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  employees      Employee[]
+  files          File[]
+  departments    Department[]
+  sectors        String[]
+  locations      String[]
+  telephone      String
+  email          String
+  website        String
+  address        String
+  description    String
+  representative String
+
+  @@index([name, telephone, email, website, address])
 }
