@@ -6,10 +6,8 @@ import { useState } from "react";
 export default function NavBar() {
 
   const [open, setOpen] = useState(false);
-  const [blur, setBlur] = useState(false);
   function openDialoge() {
     setOpen(!open);
-    setBlur(!blur);
   }
 
   return (
@@ -34,7 +32,7 @@ export default function NavBar() {
             <img
               src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
               alt=""
-              className= { blur ? "transition duration-300 blur-[1.5px]" : "transition duration-300 blur-none" }
+              className="transition duration-300 hover:blur-[1.5px]"
             />
             { open && <div className="absolute transform -translate-x-3/4 translate-y-1/4 border border-gray-700 rounded dark:bg-gray-800 p-2 shadow-md w-40">
               <div className="transform duration-300 hover:bg-gray-700 rounded p-1">Profile</div>
