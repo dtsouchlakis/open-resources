@@ -3,7 +3,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../lib/prisma";
 import PrismaAdapter from "../../utils/prismaAdapter";
-import type { Holiday } from "@prisma/client";
+import { getServerSession } from "next-auth/next";
+import { authOptions } from "../../api/auth/[...nextauth]/route";
+import { getSession } from "next-auth/react";
 
 const adapter = new PrismaAdapter();
 // To handle a GET request to /api
@@ -21,15 +23,29 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
     cursor,
   });
 
-  return NextResponse.json(data);
+  return NextResponse.json(data, { status: 200 });
 }
 
 // To handle a POST request to /api
-export async function POST(req: NextRequest): Promise<NextResponse> {
-  const body: Holiday = await req.json();
+export async function POST(
+  req: NextRequest,
+  res: NextResponse
+): Promise<NextResponse> {
+  const session = await getServerSession(authOptions);
+
+  const body = await req.json();
+  const userId = req.credentials;
+  const { start, end, wholeDay } = body;
+  const days = wholeDay
+    ? 1
+    : (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
   const _res = await prisma.holiday.create({
     data: {
-      ...body,
+      dateFrom: start,
+      dateTo: end,
+      days,
+      requestedByUser: { connect: { id: session?.user?.id } },
+      requestedAt: new Date(),
     },
   });
 

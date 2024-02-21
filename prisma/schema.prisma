@@ -5,12 +5,6 @@ generator client {
   provider = "prisma-client-js"
 }
 
-generator prismaClassGenerator {
-  provider = "prisma-class-generator"
-  output   = "prisma"
-  language = "typescript"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -103,20 +97,19 @@ model File {
 }
 
 model Holiday {
-  id                String   @id
-  name              String
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
-  requestedByUser   User     @relation(name: "RequestedByUser", fields: [requestedByUserId], references: [id])
+  id                String    @id @default(cuid())
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  requestedByUser   User      @relation(name: "RequestedByUser", fields: [requestedByUserId], references: [id])
   requestedByUserId String
   dateFrom          DateTime
   dateTo            DateTime
   days              Int
   requestedAt       DateTime
-  approvedAt        DateTime
-  approvedByUser    User?    @relation(name: "ApprovedByUser", fields: [approvedByUserId], references: [id])
-  approvedByUserId  String
-  description       String
+  approvedAt        DateTime?
+  approvedByUser    User?     @relation(name: "ApprovedByUser", fields: [approvedByUserId], references: [id])
+  approvedByUserId  String?
+  description       String?
 
   @@unique([requestedByUserId, dateFrom, dateTo])
   @@index([requestedByUserId])

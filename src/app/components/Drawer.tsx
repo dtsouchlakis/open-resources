@@ -7,6 +7,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import Menu from "./Menu";
+import "react-calendar/dist/Calendar.css";
 
 export default function Drawer({
   children,
@@ -16,7 +17,7 @@ export default function Drawer({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="text-white w-full bg-gray-100 h-screen flex flex-row">
+    <div className="w-full bg-gray-100 h-screen flex flex-row">
       <div
         className={`bg-white shadow-lg relative top-0 text-black ${
           open ? "w-64" : "w-12"
