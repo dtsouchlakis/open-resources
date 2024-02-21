@@ -1,13 +1,28 @@
 "use client";
 import { sign } from "crypto";
 import { signOut } from "next-auth/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export default function NavBar() {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
+  const menuRef = useRef<HTMLDivElement | null>(null);
+
   function openDialoge() {
     setOpen(!open);
   }
+
+  useEffect(() => {
+    function handleClickOutside(event: { target: any }) {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setOpen(false);
+      }
+    }
+
+    document.addEventListener("click", handleClickOutside);
+    return () => {
+      document.removeEventListener("click", handleClickOutside);
+    };
+  }, [open]);
 
   return (
     <div>
@@ -28,6 +43,7 @@ export default function NavBar() {
           <div
             className="rounded-full bg-gray-200 h-full w-10 overflow-hidden cursor-pointer"
             onClick={() => openDialoge()}
+            ref={menuRef}
           >
             <img
               src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
