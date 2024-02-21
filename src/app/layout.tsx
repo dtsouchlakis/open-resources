@@ -25,7 +25,7 @@ export default async function RootLayout({
     <SessionWrapper session={session}>
       <html lang="en">
         <body className={inter.className}>
-          {session && <NavBar />}
+          <NavBar />
           {children}
         </body>
       </html>
