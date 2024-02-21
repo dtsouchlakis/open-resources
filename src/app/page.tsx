@@ -12,7 +12,7 @@ export default function Home() {
           Your go-to platform for managing HR operations.
         </p>
         <div className="flex justify-between">
-          <Link href="/api/auth/signin">
+          <Link href="/api/auth/signin?callbackUrl=%2Fdashboard">
             <button className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded">
               Sign In
             </button>
