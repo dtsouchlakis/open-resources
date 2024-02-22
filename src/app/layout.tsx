@@ -7,6 +7,7 @@ import { getSession } from "next-auth/react";
 import { Session } from "next-auth";
 import { useContext, useEffect } from "react";
 import { ThemeContext, ThemeProvider } from "./lib/ThemeProvider";
+import Footer from "./components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
 inter.className = "h-full";
@@ -30,6 +31,7 @@ export default async function RootLayout({
           <body className={inter.className}>
             <NavBar />
             {children}
+            {<Footer />}
           </body>
         </html>
       </ThemeProvider>
