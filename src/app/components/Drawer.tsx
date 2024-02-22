@@ -17,7 +17,7 @@ export default function Drawer({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="w-full bg-gray-100 h-screen flex flex-row">
+    <div className="w-full bg-gray-100 h-full flex flex-row overflow-hidden ">
       <div
         className={`bg-white shadow-lg relative top-0 text-black ${
           open ? "w-64" : "w-12"
@@ -40,7 +40,7 @@ export default function Drawer({
           <Menu open={open} />
         </div>
       </div>
-      <div className="p-3 w-full h-full">{children}</div>
+      <div className="p-3 w-full h-full overflow-auto">{children}</div>
     </div>
   );
 }

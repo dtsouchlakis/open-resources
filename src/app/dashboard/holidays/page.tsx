@@ -7,16 +7,17 @@ import "react-big-calendar/lib/css/react-big-calendar.css";
 import withDragAndDrop from "react-big-calendar/lib/addons/dragAndDrop";
 import "react-big-calendar/lib/addons/dragAndDrop/styles.css";
 import CustomDialog, { useDialog } from "../../components/CustomDialog";
-import { Datepicker } from "flowbite-react";
+import { Disclosure } from "@headlessui/react";
 import { SwitchComponent } from "../../components/Switch";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import DateTimePicker from "@/app/components/DateTimePicker";
 import axios from "axios";
+import { ChevronUpIcon } from "@heroicons/react/24/outline";
 
 type Event = {
   start: Date;
   end: Date;
-  wholeDay: boolean;
+  allDay: boolean;
 };
 const localizer = momentLocalizer(moment);
 const DnDCalendar = withDragAndDrop(Calendar);
@@ -24,19 +25,19 @@ const DnDCalendar = withDragAndDrop(Calendar);
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
   const dialog = useDialog();
+  const [edit, setEdit] = useState<boolean>(false);
   const [view, setView] = useState<View>("month");
-  const { control, register, handleSubmit, formState, getValues } =
-    useForm<Event>({
-      defaultValues: {
-        start: new Date(),
-        end: new Date(),
-        wholeDay: false,
-      },
-    });
+  const { control, register, formState, getValues } = useForm<Event>({
+    defaultValues: {
+      start: new Date(),
+      end: new Date(),
+      allDay: false,
+    },
+  });
 
   const switchValue = useWatch({
     control,
-    name: "wholeDay",
+    name: "allDay",
   });
 
   const startDt = useWatch({
@@ -71,10 +72,17 @@ export default function Home() {
     console.log(events);
   }, []);
 
-  useEffect(() => {
-    console.log(events);
-  }, [events]);
+  async function handleEdit() {
+    dialog.openModal();
+    console.log(edit);
+  }
+
   async function handleAdd() {
+    dialog.openModal();
+    setEdit(true);
+  }
+  async function handleSubmit() {
+    setEdit(true);
     try {
       let data = await axios.post("/api/holiday", getValues());
       dialog.closeModal();
@@ -86,9 +94,15 @@ export default function Home() {
     <Drawer>
       <CustomDialog
         dialogHandler={dialog}
-        title="Add"
-        mode="save"
-        onSubmit={handleAdd}
+        title={edit ? "Add Event" : "Submited Event"}
+        mode={edit ? "save" : "okay"}
+        onClose={() => {
+          dialog.closeModal();
+          setEdit(false);
+        }}
+        onSubmit={() => {
+          handleSubmit();
+        }}
         onCancel={() => {
           dialog.closeModal();
         }}
@@ -100,7 +114,12 @@ export default function Home() {
             render={({ field: { value, onChange } }) => (
               <div className=" flex items-baseline justify-between">
                 <label>Start</label>
-                <DateTimePicker selected={startDt} onChange={onChange} />
+                <DateTimePicker
+                  selected={startDt}
+                  onChange={onChange}
+                  preventOpenOnFocus
+                  readOnly={!edit}
+                />
               </div>
             )}
           />
@@ -110,19 +129,24 @@ export default function Home() {
             render={({ field: { value, onChange } }) => (
               <div className=" flex items-baseline justify-between">
                 <label>End</label>
-                <DateTimePicker selected={endDt} onChange={onChange} />
+                <DateTimePicker
+                  selected={endDt}
+                  onChange={onChange}
+                  readOnly={!edit}
+                />
               </div>
             )}
           />
           <Controller
             control={control}
-            name="wholeDay"
+            name="allDay"
             render={({ field: { value, onChange } }) => (
               <div className="grid grid-cols-8">
                 <label className="col-span-4">Whole Day</label>
                 <SwitchComponent
                   className="relative mr-7"
                   checked={switchValue}
+                  disabled={!edit}
                   onChange={() =>
                     switchValue ? onChange(false) : onChange(true)
                   }
@@ -133,23 +157,48 @@ export default function Home() {
           />
         </div>
       </CustomDialog>
+
+      <div className="w-full h-full flex flex-col justify-center items-center">
+        {events.map((event, index) => (
+          <p key={index}>
+            {event.start} - {event.end}
+          </p>
+        ))}
+      </div>
       <div className="flex flex-col items-center justify-center text-black h-full">
-        <h1 className="text-3xl font-bold underline">Hello world!</h1>
-        <DnDCalendar
-          localizer={localizer}
-          events={events}
-          style={{ height: 500 }}
-          defaultDate={new Date()}
-          views={["month", "work_week"]}
-          view={view}
-          onView={setView}
-          draggableAccessor={(event) => true}
-          onDoubleClickEvent={(e) => dialog.openModal()}
-          selectable
-          onDragOver={(event) => dialog.openModal()}
-          onSelectEvent={(event) => dialog.openModal()}
-          onSelectSlot={(slotInfo) => dialog.openModal()}
-        />
+        <Disclosure>
+          {({ open }) => (
+            <>
+              <Disclosure.Button className="flex w-full justify-between rounded-lg bg-purple-100 px-4 py-2 text-left text-sm font-medium text-purple-900 hover:bg-purple-200 focus:outline-none focus-visible:ring focus-visible:ring-purple-500/75">
+                <h1 className="text-3xl font-bold underline">
+                  Holiday Calendar
+                </h1>
+                <ChevronUpIcon
+                  className={`${
+                    open ? "rotate-180 transform" : ""
+                  } h-5 w-5 text-purple-500`}
+                />
+              </Disclosure.Button>
+              <Disclosure.Panel className="px-4 pb-2 pt-4 text-sm text-gray-500">
+                <DnDCalendar
+                  localizer={localizer}
+                  events={events}
+                  style={{ height: 500 }}
+                  defaultDate={new Date()}
+                  views={["month", "work_week"]}
+                  view={view}
+                  onView={setView}
+                  draggableAccessor={(event) => true}
+                  onDoubleClickEvent={(e) => handleEdit()}
+                  selectable
+                  onDragOver={(event) => handleAdd()}
+                  onSelectEvent={(event) => handleEdit()}
+                  onSelectSlot={(slotInfo) => handleAdd()}
+                />
+              </Disclosure.Panel>
+            </>
+          )}
+        </Disclosure>
       </div>
     </Drawer>
   );

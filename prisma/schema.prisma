@@ -132,34 +132,35 @@ model Training {
 }
 
 model Employee {
-  id              String     @id
-  name            String
-  createdAt       DateTime   @default(now())
-  updatedAt       DateTime   @updatedAt
-  user            User       @relation(fields: [userId], references: [id])
-  userId          String     @unique
-  email           String
-  firstName       String
-  lastName        String
-  dateOfBirth     DateTime
-  gender          String
-  title           String
-  hiredAt         DateTime
-  lastDayWorkedAt DateTime
-  mobile          String
-  phone           String
-  address         String
-  positionTitle   String
-  department      Department @relation(fields: [departmentId], references: [id])
-  departmentId    String
-  manager         Employee   @relation(name: "Subordinate", fields: [subordinateId], references: [id])
-  managerId       String
-  image           String
-  bio             String
-  subordinate     Employee?  @relation(name: "Subordinate")
-  subordinateId   String     @unique
-  Company         Company?   @relation(fields: [companyid], references: [id])
-  companyid       String?
+  id               String     @id
+  name             String
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  user             User       @relation(fields: [userId], references: [id])
+  userId           String     @unique
+  email            String
+  firstName        String
+  lastName         String
+  dateOfBirth      DateTime
+  gender           String
+  title            String
+  hiredAt          DateTime
+  lastDayWorkedAt  DateTime
+  mobile           String
+  phone            String
+  address          String
+  positionTitle    String
+  department       Department @relation(fields: [departmentId], references: [id])
+  departmentId     String
+  manager          Employee   @relation(name: "Subordinate", fields: [subordinateId], references: [id])
+  managerId        String
+  image            String
+  bio              String
+  holidayAllowance Int?
+  subordinate      Employee?  @relation(name: "Subordinate")
+  subordinateId    String     @unique
+  Company          Company?   @relation(fields: [companyid], references: [id])
+  companyid        String?
 
   @@index([userId, email, firstName, lastName, departmentId, managerId, subordinateId])
 }

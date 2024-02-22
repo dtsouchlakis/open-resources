@@ -1,14 +1,23 @@
 "use client";
+import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
 import { sign } from "crypto";
 import { signOut } from "next-auth/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
+  const [theme, setTheme] = useState(
+    window.localStorage.getItem("theme") || "light"
+  );
 
   function openDialoge() {
     setOpen(!open);
+  }
+
+  function changeTheme(theme: string) {
+    window.localStorage.setItem("theme", theme);
+    setTheme(theme);
   }
 
   useEffect(() => {
@@ -26,7 +35,7 @@ export default function NavBar() {
 
   return (
     <div>
-      <nav className="bg-white border-gray-200 px-2 sm:px-4 py-1.5 rounded dark:bg-gray-800 flex flex-row justify-between items-center ">
+      <nav className="bg-white border-gray-200 px-2 sm:px-4 py-1.5  dark:bg-gray-800 flex flex-row justify-between items-center sticky top-0">
         <div className="">
           <a className="flex items-center">
             <img
@@ -40,6 +49,17 @@ export default function NavBar() {
           </a>
         </div>
         <div className="flex flex-row items-center justify-between gap-4">
+          {theme == "dark" ? (
+            <MoonIcon
+              className="h-7 w-7 hover:text-gray-500 duration-300 text-gray-400 cursor-pointer rounded-full border-2 border-gray-400"
+              onClick={() => changeTheme("light")}
+            />
+          ) : (
+            <SunIcon
+              className="h-7 w-7 hover:text-gray-500 duration-300 text-yellow-400 cursor-pointer rounded-full border-2 border-yellow-400"
+              onClick={() => changeTheme("dark")}
+            />
+          )}
           <div
             className="rounded-full bg-gray-200 h-full w-10 overflow-hidden cursor-pointer"
             onClick={() => openDialoge()}

@@ -4,7 +4,7 @@ import { Fragment, useState } from "react";
 type mode = "save" | "okay";
 
 export function useDialog() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
 
   function closeModal() {
     setIsOpen(false);
@@ -24,6 +24,7 @@ export default function MyModal({
   onSubmit,
   onCancel,
   onOkay,
+  onClose,
 }: {
   children: React.ReactNode;
   title: string;
@@ -34,17 +35,14 @@ export default function MyModal({
     openModal: () => void;
   };
   onSubmit?: () => void;
+  onClose: () => void;
   onCancel?: () => void;
   onOkay?: () => void;
 }) {
   return (
     <>
       <Transition appear show={dialogHandler.isOpen} as={Fragment}>
-        <Dialog
-          as="div"
-          className="relative z-50"
-          onClose={dialogHandler.closeModal}
-        >
+        <Dialog as="div" className="relative z-50" onClose={onClose}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -79,7 +77,7 @@ export default function MyModal({
                   <div className="mt-4">
                     <button
                       type="button"
-                      className="inline-flex rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
+                      className="inline-flex rounded-md border border-transparent bg-blue-100 px-4 py-2 text-sm mr-4 font-medium text-blue-900 hover:bg-blue-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                       onClick={mode === "save" ? onSubmit : onOkay}
                     >
                       {mode === "save" ? "Save" : "Okay"}

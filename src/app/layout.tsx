@@ -5,8 +5,11 @@ import NavBar from "./components/NavBar";
 import SessionWrapper from "./components/SessionWrapper";
 import { getSession } from "next-auth/react";
 import { Session } from "next-auth";
+import { useContext, useEffect } from "react";
+import { ThemeContext, ThemeProvider } from "./lib/ThemeProvider";
 
 const inter = Inter({ subsets: ["latin"] });
+inter.className = "h-screen w-screen overflow-hidden";
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -23,12 +26,14 @@ export default async function RootLayout({
 
   return (
     <SessionWrapper session={session}>
-      <html lang="en">
-        <body className={inter.className}>
-          <NavBar />
-          {children}
-        </body>
-      </html>
+      <ThemeProvider>
+        <html lang="en">
+          <body className={inter.className}>
+            <NavBar />
+            {children}
+          </body>
+        </html>
+      </ThemeProvider>
     </SessionWrapper>
   );
 }

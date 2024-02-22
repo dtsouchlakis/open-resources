@@ -52,4 +52,29 @@ export async function POST(
   return NextResponse.json(_res, { status: 201 });
 }
 
-// Same logic to add a `PATCH`, `DELETE`...
+export async function Delete(
+  req: NextRequest,
+  res: NextResponse
+): Promise<NextResponse> {
+  const body = await req.json();
+  const _res = await prisma.holiday.delete({
+    where: {
+      id: body.id,
+    },
+  });
+  return NextResponse.json(_res, { status: 201 });
+}
+
+export async function PUT(
+  req: NextRequest,
+  res: NextResponse
+): Promise<NextResponse> {
+  const body = await req.json();
+  const _res = await prisma.holiday.update({
+    where: {
+      id: body.id,
+    },
+    data: body,
+  });
+  return NextResponse.json(_res, { status: 201 });
+}
