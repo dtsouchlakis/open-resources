@@ -161,7 +161,7 @@ export default function Home() {
       <div className="w-full h-full flex flex-col justify-center items-center">
         {events.map((event, index) => (
           <p key={index}>
-            {event.start} - {event.end}
+            {event.start.getDate()} - {event.allDay} -
           </p>
         ))}
       </div>

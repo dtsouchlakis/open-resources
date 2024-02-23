@@ -1,23 +1,21 @@
 "use client";
-import { MoonIcon, SunIcon } from "@heroicons/react/24/outline";
+import { SunIcon } from "@heroicons/react/24/outline";
+import { MoonIcon } from "@heroicons/react/24/solid";
 import { sign } from "crypto";
 import { signOut } from "next-auth/react";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useTheme } from "../lib/ThemeProvider";
 
 export default function NavBar() {
   const [open, setOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement | null>(null);
-  const [theme, setTheme] = useState(
-    window.localStorage.getItem("theme") || "light"
-  );
-
+  const { theme, changeTheme } = useTheme();
   function openDialoge() {
     setOpen(!open);
   }
 
-  function changeTheme(theme: string) {
-    window.localStorage.setItem("theme", theme);
-    setTheme(theme);
+  function setTheme(theme: string) {
+    changeTheme(theme);
   }
 
   useEffect(() => {
@@ -49,15 +47,15 @@ export default function NavBar() {
           </a>
         </div>
         <div className="flex flex-row items-center justify-between gap-4">
-          {theme == "dark" ? (
+          {theme == "light" ? (
             <MoonIcon
               className="h-7 w-7 hover:text-gray-500 duration-300 text-gray-400 cursor-pointer rounded-full border-2 border-gray-400"
-              onClick={() => changeTheme("light")}
+              onClick={() => setTheme("dark")}
             />
           ) : (
             <SunIcon
               className="h-7 w-7 hover:text-gray-500 duration-300 text-yellow-400 cursor-pointer rounded-full border-2 border-yellow-400"
-              onClick={() => changeTheme("dark")}
+              onClick={() => setTheme("light")}
             />
           )}
           <div

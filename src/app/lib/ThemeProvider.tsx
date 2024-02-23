@@ -1,49 +1,35 @@
 "use client";
-import React, { useEffect, createContext, useState } from "react";
+import { root } from "postcss";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { set } from "react-hook-form";
 
-const ThemeContext = createContext({
-  theme: "",
-});
+export const ThemeContext = createContext({});
 
-const getTheme = () => {
-  const theme = localStorage.getItem("theme");
-  if (!theme) {
-    // Default theme is taken as dark-theme
-    localStorage.setItem("theme", "dark-theme");
-    return "dark-theme";
-  } else {
-    return theme;
-  }
-};
-
-const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
-  const [theme, setTheme] = useState(getTheme);
-
-  function toggleTheme() {
-    if (theme === "dark-theme") {
-      setTheme("light-theme");
-    } else {
-      setTheme("dark-theme");
-    }
-  }
-
-  useEffect(() => {
-    const refreshTheme = () => {
-      localStorage.setItem("theme", theme);
-    };
-
-    refreshTheme();
-  }, [theme]);
+export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
+  const { theme, changeTheme } = useTheme();
 
   return (
-    <ThemeContext.Provider
-      value={{
-        theme,
-      }}
-    >
+    <ThemeContext.Provider value={{ theme, changeTheme }} key={theme}>
       {children}
     </ThemeContext.Provider>
   );
 };
 
-export { ThemeContext, ThemeProvider };
+export function useTheme() {
+  const [theme, setTheme] = useState("light");
+
+  useEffect(() => {
+    if (global?.window !== undefined) {
+      document.documentElement.className = theme;
+    }
+  }, [theme]);
+
+  function changeTheme(theme: string) {
+    console.log(theme);
+
+    global.window.localStorage.setItem("theme", theme);
+    setTheme(theme);
+    console.log(localStorage.getItem("theme"));
+  }
+  return { theme, changeTheme };
+}
