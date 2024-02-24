@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { DragEvent, useEffect, useState } from "react";
 import Drawer from "../../components/Drawer";
 import { Calendar, View, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
@@ -12,12 +12,22 @@ import { SwitchComponent } from "../../components/Switch";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import DateTimePicker from "@/app/components/DateTimePicker";
 import axios from "axios";
-import { ChevronUpIcon } from "@heroicons/react/24/outline";
+import PinnedItem from "@/app/components/PinnedItem";
+import {
+  CalendarDaysIcon,
+  XCircleIcon,
+  CheckCircleIcon,
+  PencilSquareIcon,
+  TrashIcon,
+} from "@heroicons/react/24/solid";
 
 type Event = {
+  title?: string;
   start: Date;
   end: Date;
-  allDay: boolean;
+  startWholeDay: boolean;
+  endWholeDay: boolean;
+  id?: string;
 };
 const localizer = momentLocalizer(moment);
 const DnDCalendar = withDragAndDrop(Calendar);
@@ -27,17 +37,23 @@ export default function Home() {
   const dialog = useDialog();
   const [edit, setEdit] = useState<boolean>(false);
   const [view, setView] = useState<View>("month");
+  const [indexToEdit, setIndexEdit] = useState<number | null>(null);
   const { control, register, formState, getValues } = useForm<Event>({
     defaultValues: {
       start: new Date(),
       end: new Date(),
-      allDay: false,
+      startWholeDay: false,
+      endWholeDay: false,
     },
   });
 
-  const switchValue = useWatch({
+  const switchValueStart = useWatch({
     control,
-    name: "allDay",
+    name: "startWholeDay",
+  });
+  const switchValueEnd = useWatch({
+    control,
+    name: "endWholeDay",
   });
 
   const startDt = useWatch({
@@ -52,46 +68,93 @@ export default function Home() {
 
   useEffect(() => {
     console.log(getValues());
-  }, [switchValue, startDt, endDt]);
+  }, [switchValueStart, switchValueEnd, startDt, endDt]);
+
+  async function init() {
+    const _events = await axios.get("/api/holiday");
+    console.log(_events.data);
+    let events = _events.data.map((e: any) => {
+      return {
+        start: e.dateFrom,
+        end: e.dateTo,
+        allDay: e.wholeDay,
+        title: e.description,
+        id: e.id,
+      };
+    });
+    setEvents(events);
+  }
 
   useEffect(() => {
-    async function init() {
-      const _events = await axios.get("/api/holiday");
-      console.log(_events.data);
-      let events = _events.data.map((e: any) => {
-        return {
-          start: e.dateFrom,
-          end: e.dateTo,
-          allDay: e.wholeDay,
-        };
-      });
-      setEvents(events);
-    }
+    console.log(events);
 
     init();
-    console.log(events);
-  }, []);
 
-  async function handleEdit() {
+    console.log(events, getValues());
+  }, [edit]);
+
+  async function handleEdit(index?: number) {
+    index ? setIndexEdit(index) : setIndexEdit(null);
+    console.log(getValues(), "edit");
+
     dialog.openModal();
     console.log(edit);
   }
 
-  async function handleAdd() {
+  async function handleAdd(start: Date, end: Date) {
+    console.log(getValues(), "add");
+
+    startDt.setDate(start.getDate());
+    endDt.setDate(end.getDate());
+
     dialog.openModal();
     setEdit(true);
   }
   async function handleSubmit() {
+    console.log(getValues(), "submit");
+
     setEdit(true);
+    if (!edit) {
+      try {
+        let data = await axios.post("/api/holiday", {
+          startDt,
+          endDt,
+          switchValueEnd,
+          switchValueStart,
+        });
+        dialog.closeModal();
+      } catch (error) {
+        console.log(error);
+      }
+    } else {
+      const res = await axios.put("/api/holiday", {
+        startDt,
+        endDt,
+        switchValueEnd,
+        switchValueStart,
+        id: events[0].id,
+      });
+    }
+    init();
+  }
+  async function handleDelete(index: number) {
+    console.log(events[index]);
+    setIndexEdit(index);
     try {
-      let data = await axios.post("/api/holiday", getValues());
-      dialog.closeModal();
+      const res = await axios.delete("/api/holiday", {
+        data: {
+          id: events[index].id,
+        },
+      });
+      init();
+      setIndexEdit(null);
     } catch (error) {
       console.log(error);
     }
   }
+
   return (
-    <Drawer>
+    <Drawer className="grid-cols-2 gap-4 h-min" title="Holidays">
       <CustomDialog
         dialogHandler={dialog}
         title={edit ? "Add Event" : "Submited Event"}
@@ -118,7 +181,12 @@ export default function Home() {
                   selected={startDt}
                   onChange={onChange}
                   preventOpenOnFocus
+                  showTimeSelect={!switchValueStart}
+                  dateFormat={
+                    switchValueStart ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm"
+                  }
                   readOnly={!edit}
+                  def
                 />
               </div>
             )}
@@ -132,6 +200,10 @@ export default function Home() {
                 <DateTimePicker
                   selected={endDt}
                   onChange={onChange}
+                  dateFormat={
+                    switchValueEnd ? "yyyy-MM-dd" : "yyyy-MM-dd HH:mm"
+                  }
+                  showTimeSelect={!switchValueEnd}
                   readOnly={!edit}
                 />
               </div>
@@ -139,16 +211,34 @@ export default function Home() {
           />
           <Controller
             control={control}
-            name="allDay"
+            name="startWholeDay"
             render={({ field: { value, onChange } }) => (
               <div className="grid grid-cols-8">
-                <label className="col-span-4">Whole Day</label>
+                <label className="col-span-4">Start Whole Day</label>
                 <SwitchComponent
                   className="relative mr-7"
-                  checked={switchValue}
+                  checked={switchValueStart}
                   disabled={!edit}
                   onChange={() =>
-                    switchValue ? onChange(false) : onChange(true)
+                    switchValueStart ? onChange(false) : onChange(true)
+                  }
+                  name
+                />
+              </div>
+            )}
+          />
+          <Controller
+            control={control}
+            name="endWholeDay"
+            render={({ field: { value, onChange } }) => (
+              <div className="grid grid-cols-8">
+                <label className="col-span-4">End Whole Day</label>
+                <SwitchComponent
+                  className="relative mr-7"
+                  checked={switchValueEnd}
+                  disabled={!edit}
+                  onChange={() =>
+                    switchValueEnd ? onChange(false) : onChange(true)
                   }
                   name
                 />
@@ -157,49 +247,56 @@ export default function Home() {
           />
         </div>
       </CustomDialog>
-
-      <div className="w-full h-full flex flex-col justify-center items-center">
-        {events.map((event, index) => (
-          <p key={index}>
-            {event.start.getDate()} - {event.allDay} -
-          </p>
-        ))}
-      </div>
-      <div className="flex flex-col items-center justify-center text-black h-full">
-        <Disclosure>
-          {({ open }) => (
-            <>
-              <Disclosure.Button className="flex w-full justify-between rounded-lg bg-purple-100 px-4 py-2 text-left text-sm font-medium text-purple-900 hover:bg-purple-200 focus:outline-none focus-visible:ring focus-visible:ring-purple-500/75">
-                <h1 className="text-3xl font-bold underline">
-                  Holiday Calendar
-                </h1>
-                <ChevronUpIcon
-                  className={`${
-                    open ? "rotate-180 transform" : ""
-                  } h-5 w-5 text-purple-500`}
+      <PinnedItem className="!w-auto !h-auto">
+        <div className="w-full  grid grid-flow-row justify-center items-center">
+          {events.map((event, index) => (
+            <div
+              className="flex flex-shrink-0 items-center justify-between"
+              key={index}
+            >
+              <CalendarDaysIcon className="w-6 mr-2 text-blue-500" />
+              <div className="h-10 border-b border-gray-300 flex items-center">
+                {new Date(event.start).toDateString()} -
+                {new Date(event.end).toDateString()}
+              </div>
+              <div className="flex items-center ml-2">
+                <PencilSquareIcon
+                  className="w-6 text-blue-500 hover:text-blue-700 cursor-pointer"
+                  onClick={() => {
+                    setEdit(true);
+                    handleEdit(index);
+                  }}
                 />
-              </Disclosure.Button>
-              <Disclosure.Panel className="px-4 pb-2 pt-4 text-sm text-gray-500">
-                <DnDCalendar
-                  localizer={localizer}
-                  events={events}
-                  style={{ height: 500 }}
-                  defaultDate={new Date()}
-                  views={["month", "work_week"]}
-                  view={view}
-                  onView={setView}
-                  draggableAccessor={(event) => true}
-                  onDoubleClickEvent={(e) => handleEdit()}
-                  selectable
-                  onDragOver={(event) => handleAdd()}
-                  onSelectEvent={(event) => handleEdit()}
-                  onSelectSlot={(slotInfo) => handleAdd()}
+                <TrashIcon
+                  className="w-6 text-red-500 hover:text-red-700 cursor-pointer"
+                  onClick={() => handleDelete(index)}
                 />
-              </Disclosure.Panel>
-            </>
-          )}
-        </Disclosure>
-      </div>
+                {/* <XCircleIcon className="w-6 text-red-500 hover:text-red-700 cursor-pointer" onClick={() => handleDelete()}/>
+                <CheckCircleIcon className="w-6 text-green-500 hover:text-green-700 cursor-pointer" onClick={() => handleEdit()}/> */}
+              </div>
+            </div>
+          ))}
+        </div>
+      </PinnedItem>
+      <PinnedItem className="w-auto">
+        <div className="flex flex-col items-center justify-center text-black h-full rounded-sm">
+          <DnDCalendar
+            localizer={localizer}
+            events={events}
+            style={{ height: 500 }}
+            defaultDate={new Date()}
+            views={["month", "work_week"]}
+            view={view}
+            onView={setView}
+            draggableAccessor={(event) => true}
+            onDoubleClickEvent={(e) => handleEdit()}
+            selectable
+            onDragOver={(event: DragEvent) => handleAdd(startDt, endDt)}
+            onSelectEvent={(event) => handleEdit()}
+            onSelectSlot={(slotInfo) => handleAdd(slotInfo.start, slotInfo.end)}
+          />
+        </div>
+      </PinnedItem>
     </Drawer>
   );
 }

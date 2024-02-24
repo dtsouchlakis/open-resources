@@ -35,24 +35,32 @@ export async function POST(
 
   const body = await req.json();
   const userId = req.credentials;
-  const { start, end, wholeDay } = body;
-  const days = wholeDay
-    ? 1
-    : (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24);
+  const { startDt, endDt, switchValueEnd, switchValueStart, title } = body;
+
+  let days =
+    (new Date(endDt).getTime() - new Date(startDt).getTime()) /
+    (1000 * 60 * 60 * 24);
+
+  if (switchValueStart || switchValueEnd) {
+    days -= 0.5;
+  } else {
+    days -= 1;
+  }
   const _res = await prisma.holiday.create({
     data: {
-      dateFrom: start,
-      dateTo: end,
+      dateFrom: startDt,
+      dateTo: endDt,
       days,
       requestedByUser: { connect: { id: session?.user?.id } },
       requestedAt: new Date(),
+      description: title ? title : `${session?.user?.name} - PTO`,
     },
   });
 
-  return NextResponse.json(_res, { status: 201 });
+  return NextResponse.json(_res, { status: 200 });
 }
 
-export async function Delete(
+export async function DELETE(
   req: NextRequest,
   res: NextResponse
 ): Promise<NextResponse> {
@@ -62,7 +70,7 @@ export async function Delete(
       id: body.id,
     },
   });
-  return NextResponse.json(_res, { status: 201 });
+  return NextResponse.json(_res, { status: 200 });
 }
 
 export async function PUT(
@@ -70,11 +78,29 @@ export async function PUT(
   res: NextResponse
 ): Promise<NextResponse> {
   const body = await req.json();
+  const userId = req.credentials;
+  const { startDt, endDt, switchValueEnd, switchValueStart, title } = body;
+
+  let days =
+    (new Date(endDt).getTime() - new Date(startDt).getTime()) /
+    (1000 * 60 * 60 * 24);
+
+  if (switchValueStart || switchValueEnd) {
+    days -= 0.5;
+  } else {
+    days -= 1;
+  }
   const _res = await prisma.holiday.update({
     where: {
       id: body.id,
     },
-    data: body,
+    data: {
+      dateFrom: startDt,
+      dateTo: endDt,
+      days,
+      requestedAt: new Date(),
+    },
   });
-  return NextResponse.json(_res, { status: 201 });
+
+  return NextResponse.json(_res, { status: 200 });
 }
