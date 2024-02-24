@@ -8,6 +8,7 @@ import {
 } from "@heroicons/react/24/outline";
 import Menu from "./Menu";
 import "react-calendar/dist/Calendar.css";
+import Footer from "./Footer";
 
 export default function Drawer({
   title,
@@ -21,9 +22,9 @@ export default function Drawer({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="w-full bg-gray-100 h-[calc(100vh-56px)] flex flex-row dark:bg-gray-600 -mt-14 top-14 relative overflow-hidden dark:text-white text-black">
+    <div className="w-full bg-gray-100 h-[calc(100vh-68px)] flex flex-row dark:bg-gray-600 -mt-14 top-14 relative overflow-hidden dark:text-white text-black">
       <div
-        className={`bg-white shadow-lg relative  text-black dark:bg-gray-800 ${
+        className={`bg-white shadow-lg relative text-black dark:bg-gray-800 ${
           open ? "w-64" : "w-12"
         } h-full left-0 duration-300`}
       >
