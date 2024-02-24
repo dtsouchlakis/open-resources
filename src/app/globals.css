@@ -2,10 +2,12 @@
 @tailwind components;
 @tailwind utilities;
 
+
 :root {
   --foreground-rgb: 0, 0, 0;
   --background-start-rgb: 214, 219, 220;
   --background-end-rgb: 255, 255, 255;
+  font: "roboto", sans-serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -34,4 +36,11 @@ body {
   justify-content: center;
   /* align horizontal */
   align-items: center;
+}
+
+.react-datepicker {
+  border-radius: 5px;
+  border-color: transparent !important;
+  border-width: 0;
+  background-color: white !important;
 }

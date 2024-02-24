@@ -2,12 +2,12 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import { PrismaClient } from "@prisma/client";
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-
+import { AuthOptions } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import GoogleProvider from "next-auth/providers/google";
 
 const prisma = new PrismaClient();
-const handler = NextAuth({
+export const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       // The name to display on the sign in form (e.g. 'Sign in with...')
@@ -54,12 +54,30 @@ const handler = NextAuth({
       },
     }),
   ],
+
   session: {
     strategy: "jwt",
+  },
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user?.id) {
+        token.id = user.id;
+      }
+
+      return token;
+    },
+    async session({ session, token, user }) {
+      //I also tried it this way, according to the docs at:
+      //  https://next-auth.js.org/configuration/callbacks
+      session.user!.id = token.id;
+
+      return session;
+    },
   },
 
   adapter: PrismaAdapter(prisma),
   debug: true,
-});
+};
 
+const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
