@@ -7,7 +7,7 @@ export default function PinnedItem({
 }) {
   return (
     <div
-      className={`${className} w-max h-max bg-white rounded-md shadow-lg p-4`}
+      className={`${className} w-max h-max bg-white dark:bg-gray-800 text-black dark:text-white rounded-md shadow-lg p-4`}
     >
       {children}
     </div>

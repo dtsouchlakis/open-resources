@@ -4,9 +4,7 @@ import "./globals.css";
 import NavBar from "./components/NavBar";
 import SessionWrapper from "./components/SessionWrapper";
 import { getSession } from "next-auth/react";
-import { Session } from "next-auth";
-import { useContext, useEffect } from "react";
-import { ThemeContext, ThemeProvider } from "./lib/ThemeProvider";
+import { ThemeProvider } from "./lib/ThemeProvider";
 import Footer from "./components/Footer";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -26,15 +24,28 @@ export default async function RootLayout({
 
   return (
     <SessionWrapper session={session}>
-      <ThemeProvider>
-        <html lang="en" className="h-full overflow-hidden">
-          <body className={inter.className}>
-            <NavBar />
-            {children}
-            {<Footer />}
-          </body>
-        </html>
-      </ThemeProvider>
+      <html lang="en" className="h-full overflow-hidden">
+        <head>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+        try {
+          if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+          } else {
+            document.documentElement.classList.remove('dark')
+          }
+        } catch (_) {}
+      `,
+            }}
+          />
+        </head>
+        <body className={inter.className}>
+          <NavBar />
+          {children}
+          {<Footer />}
+        </body>
+      </html>
     </SessionWrapper>
   );
 }

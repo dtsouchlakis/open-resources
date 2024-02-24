@@ -1,10 +1,9 @@
 "use client";
-import { root } from "postcss";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { set } from "react-hook-form";
 
 export const ThemeContext = createContext({});
 
+// Not using theme provider, use head script instead. Provider flickers on load
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
   const { theme, changeTheme } = useTheme();
 
@@ -20,6 +19,8 @@ export function useTheme() {
 
   useEffect(() => {
     if (global?.window !== undefined) {
+      const _theme = global.window.localStorage.getItem("theme");
+      setTheme(_theme || "light");
       document.documentElement.className = theme;
     }
   }, [theme]);

@@ -44,3 +44,25 @@ body {
   border-width: 0;
   background-color: white !important;
 }
+
+.dark .rbc-off-range-bg {
+  background-color: #1f1f1f !important;
+
+}
+
+.dark .rbc-addons-dnd {
+  color: white !important;
+}
+
+.dark .rbc-toolbar button {
+  color: white !important;
+}
+
+.dark .rbc-active {
+  color: white !important;
+  background-color: #1f1f1f !important;
+}
+
+.dark .rbc-today {
+  background-color: #7c738d !important;
+}
