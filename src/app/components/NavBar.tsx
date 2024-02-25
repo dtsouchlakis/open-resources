@@ -1,6 +1,8 @@
 "use client";
 import { SunIcon } from "@heroicons/react/24/outline";
 import { MoonIcon } from "@heroicons/react/24/solid";
+import { UserCircleIcon } from "@heroicons/react/24/outline";
+import { ArrowLeftEndOnRectangleIcon } from "@heroicons/react/24/outline";
 import { signIn, signOut } from "next-auth/react";
 import { useContext, useEffect, useMemo, useRef, useState } from "react";
 import { ThemeContext, useTheme } from "../lib/ThemeProvider";
@@ -80,14 +82,15 @@ export default function NavBar() {
               />
               {open && (
                 <div className="absolute transform bg-white -translate-x-3/4 translate-y-1/4 border border-gray-700 rounded dark:bg-gray-800 p-2 shadow-md w-40 text-black dark:text-white z-50">
-                  <div className="transform duration-300 hover:bg-gray-700 rounded p-1">
+                  <div className="transform duration-300 hover:bg-gray-700 rounded p-1 flex flex-row items-center">
+                    <UserCircleIcon className="h-5 me-2" />
                     Profile
                   </div>
                   <div
-                    className="transform duration-300 hover:bg-gray-700 rounded p-1"
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    role="button"
+                    className="transform duration-300 hover:bg-gray-700 rounded p-1 flex flex-row items-center"
+                    onClick={() => signOut()}
                   >
+                    <ArrowLeftEndOnRectangleIcon className="h-5 me-2" />
                     Log out
                   </div>
                 </div>
