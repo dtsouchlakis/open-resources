@@ -1,7 +1,10 @@
 "use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 
-export const ThemeContext = createContext({});
+export const ThemeContext = createContext({
+  theme: "light" || "dark",
+  changeTheme: (theme: string) => {},
+});
 
 // Not using theme provider, use head script instead. Provider flickers on load
 export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
@@ -15,12 +18,18 @@ export const ThemeProvider = ({ children }: { children: React.ReactNode }) => {
 };
 
 export function useTheme() {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(() => {
+    if (global?.window !== undefined) {
+      return global.window.localStorage.getItem("theme") || "light";
+    } else {
+      return "light";
+    }
+  });
 
   useEffect(() => {
     if (global?.window !== undefined) {
-      const _theme = global.window.localStorage.getItem("theme");
-      setTheme(_theme || "light");
+      console.log("theme", global.window.localStorage.getItem("theme"));
+
       document.documentElement.className = theme;
     }
   }, [theme]);
