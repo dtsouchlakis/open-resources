@@ -87,10 +87,10 @@ export default function NavBar() {
                     Profile
                   </div>
                   <div
-                    className="transform duration-300 hover:bg-gray-700 rounded p-1"
-                    onClick={() => signOut({ callbackUrl: "/" })}
-                    role="button"
+                    className="transform duration-300 hover:bg-gray-700 rounded p-1 flex flex-row items-center"
+                    onClick={() => signOut()}
                   >
+                    <ArrowLeftEndOnRectangleIcon className="h-5 me-2" />
                     Log out
                   </div>
                 </div>
