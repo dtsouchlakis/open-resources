@@ -21,7 +21,7 @@ export default function Footer() {
           <li>
             <button
               onClick={() => openDialoge()}
-              className="me-3 text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center dark:focus:ring-gray-700"
+              className="me-3 text-white focus:ring-4 font-medium rounded-lg text-sm px-5 py-1.5 text-center inline-flex items-center focus:ring-blue-700 dark:focus:ring-gray-700"
               type="button"
             >
               <img src="/usa.png" className="h-5 me-3" />
@@ -43,7 +43,7 @@ export default function Footer() {
               </svg>
             </button>
             {open && (
-              <div className="absolute transform -translate-x-2 -translate-y-24 bg-white rounded-lg shadow-md w-40 p-2 dark:bg-gray-800">
+              <div className="absolute transform -translate-x-2 -translate-y-24 border border-gray-700 bg-white rounded-lg shadow-md w-40 p-2 text-black dark:bg-gray-800 dark:text-white">
                 <ul className="text-sm">
                   <li className="cursor-pointer flex items-center transform duration-300 hover:bg-gray-700 rounded p-1">
                     <img src="/korea.png" className="h-5 me-3" />
@@ -57,7 +57,7 @@ export default function Footer() {
             <a
               href="https://github.com/"
               target="_blank"
-              className="inline-flex justify-center p-2 rounded-lg cursor-pointer dark:hover:bg-gray-700"
+              className="inline-flex justify-center p-2 rounded-lg cursor-pointer hover:bg-blue-700 dark:hover:bg-gray-700"
             >
               <img src="/github.svg" className="h-5 fill-blue" />
             </a>
@@ -66,7 +66,7 @@ export default function Footer() {
             <a
               href="#"
               target="_blank"
-              className="inline-flex justify-center p-2 rounded-lg cursor-pointer dark:hover:bg-gray-700"
+              className="inline-flex justify-center p-2 rounded-lg cursor-pointer hover:bg-blue-700 dark:hover:bg-gray-700"
             >
               <EnvelopeIcon className="h-5 fill-white" />
             </a>
@@ -75,7 +75,7 @@ export default function Footer() {
             <a
               href="https://github.com/"
               target="_blank"
-              className="inline-flex justify-center p-2 rounded-lg cursor-pointer dark:hover:bg-gray-700"
+              className="inline-flex justify-center p-2 rounded-lg cursor-pointer hover:bg-blue-700 dark:hover:bg-gray-700"
             >
               <ScaleIcon className="h-5 fill-white" />
             </a>
@@ -85,9 +85,9 @@ export default function Footer() {
             <a
               href="https://nextjs.org/"
               target="_blank"
-              className="inline-flex justify-center rounded-lg cursor-pointer dark:hover:bg-gray-700"
+              className="inline-flex justify-center rounded-lg cursor-pointer hover:bg-blue-700 dark:hover:bg-gray-700"
             >
-              <img src="/next.svg" className="h-2 " />
+              <img src="/next.svg" className="h-2 m-2" />
             </a>
           </li>
         </ul>
