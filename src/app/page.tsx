@@ -1,9 +1,17 @@
 "use client";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 export default function Home() {
   const router = useRouter();
+  const session = useSession();
+  useEffect(() => {
+    if (session) {
+      router.push("/dashboard");
+    }
+  }, []);
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="max-w-md w-full bg-white p-8 rounded shadow-md">

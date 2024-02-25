@@ -22,7 +22,7 @@ export default function Drawer({
   const [open, setOpen] = useState(true);
 
   return (
-    <div className="w-full bg-gray-100 h-[calc(100vh-68px)] flex flex-row dark:bg-gray-600 -mt-14 top-14 relative overflow-hidden dark:text-white text-black">
+    <div className="w-full h-[calc(100%-96px)] bg-gray-100 flex flex-row dark:bg-gray-600   relative overflow-hidden dark:text-white text-black">
       <div
         className={`bg-white shadow-lg relative text-black dark:bg-gray-800 ${
           open ? "w-64" : "w-12"
@@ -48,10 +48,12 @@ export default function Drawer({
         </div>
       </div>
       <div className="w-full h-full bg-gray-100 dark:bg-gray-600">
-        <h1 className="text-2xl font-bold p-3 dark:text-white h-16 bg-white dark:bg-gray-800 w-full">
+        <h1 className="text-2xl h-[56px] font-bold p-3 dark:text-white bg-white dark:bg-gray-800 w-full">
           {title}
         </h1>
-        <div className={`p-3 w-full overflow-auto grid h-full ${className}`}>
+        <div
+          className={`p-3 w-full flex overflow-auto h-[calc(100%-56px)] overflow-y-auto ${className}`}
+        >
           {children}
         </div>
       </div>

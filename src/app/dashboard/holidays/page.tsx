@@ -154,7 +154,10 @@ export default function Home() {
   }
 
   return (
-    <Drawer className="grid-cols-2 gap-4 h-min" title="Holidays">
+    <Drawer
+      className="flex flex-row flex-shrink-0 w-full justify-around gap-8"
+      title="Holidays"
+    >
       <CustomDialog
         dialogHandler={dialog}
         title={edit ? "Add Event" : "Submited Event"}
@@ -170,7 +173,7 @@ export default function Home() {
           dialog.closeModal();
         }}
       >
-        <div className="flex flex-col justify-between w-full text-black text-sm space-y-4">
+        <div className="flex flex-col justify-between w-full text-black text-sm space-y-4 h-full">
           <Controller
             control={control}
             name="start"
@@ -247,7 +250,7 @@ export default function Home() {
           />
         </div>
       </CustomDialog>
-      <PinnedItem className="!w-auto !h-auto">
+      <PinnedItem className=" grow">
         <div className="w-full  grid grid-flow-row justify-center items-center">
           {events.map((event, index) => (
             <div
