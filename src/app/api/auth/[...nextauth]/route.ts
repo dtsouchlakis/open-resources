@@ -5,6 +5,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import { AuthOptions } from "next-auth";
 import EmailProvider from "next-auth/providers/email";
 import GoogleProvider from "next-auth/providers/google";
+import axios from "axios";
 
 const prisma = new PrismaClient();
 export const authOptions: AuthOptions = {
@@ -59,7 +60,18 @@ export const authOptions: AuthOptions = {
     strategy: "jwt",
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, account, profile, trigger }) {
+      if (trigger === "signUp") {
+        try {
+          const url = `https://ui-avatars.com/api/?name=${user.name}&background=random`;
+          const res = await fetch(`http://localhost:3000/api/user/${user.id}`, {
+            method: "PUT",
+            body: JSON.stringify({ image: url }),
+          });
+        } catch (e) {
+          console.log("error", e);
+        }
+      }
       if (user?.id) {
         token.id = user.id;
       }
@@ -67,11 +79,16 @@ export const authOptions: AuthOptions = {
       return token;
     },
     async session({ session, token, user }) {
+      console.log(token, user, "session");
       //I also tried it this way, according to the docs at:
       //  https://next-auth.js.org/configuration/callbacks
       session.user!.id = token.id;
 
       return session;
+    },
+
+    async signIn({ user, account, profile, email, credentials }) {
+      return true;
     },
   },
 
