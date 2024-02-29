@@ -76,9 +76,12 @@ export default function NavBar() {
               ref={menuRef}
             >
               <img
-                src="https://flowbite.com/docs/images/people/profile-picture-5.jpg"
+                src={
+                  session.user?.image ||
+                  "https://www.ncenet.com/wp-content/uploads/2020/04/No-image-found.jpg"
+                }
                 alt=""
-                className="transition duration-300 hover:blur-[1.5px]"
+                className="transition duration-300 hover:blur-[1.5px] h-full w-full object-cover"
               />
               {open && (
                 <div className="absolute transform bg-white -translate-x-3/4 translate-y-1/4 border border-gray-700 rounded dark:bg-gray-800 p-2 shadow-md w-40 text-black dark:text-white z-50">
