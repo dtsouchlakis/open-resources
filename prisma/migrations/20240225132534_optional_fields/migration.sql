@@ -1,0 +1,17 @@
+-- DropForeignKey
+ALTER TABLE "Employee" DROP CONSTRAINT "Employee_departmentId_fkey";
+
+-- AlterTable
+ALTER TABLE "Employee" ALTER COLUMN "gender" DROP NOT NULL,
+ALTER COLUMN "title" DROP NOT NULL,
+ALTER COLUMN "lastDayWorkedAt" DROP NOT NULL,
+ALTER COLUMN "phone" DROP NOT NULL,
+ALTER COLUMN "address" DROP NOT NULL,
+ALTER COLUMN "positionTitle" DROP NOT NULL,
+ALTER COLUMN "departmentId" DROP NOT NULL,
+ALTER COLUMN "managerId" DROP NOT NULL,
+ALTER COLUMN "image" DROP NOT NULL,
+ALTER COLUMN "bio" DROP NOT NULL;
+
+-- AddForeignKey
+ALTER TABLE "Employee" ADD CONSTRAINT "Employee_departmentId_fkey" FOREIGN KEY ("departmentId") REFERENCES "Department"("id") ON DELETE SET NULL ON UPDATE CASCADE;

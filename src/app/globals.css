@@ -37,6 +37,7 @@ body {
   justify-content: center;
   /* align horizontal */
   align-items: center;
+  width: 100%;
 }
 
 .react-datepicker {
@@ -66,4 +67,8 @@ body {
 
 .dark .rbc-today {
   background-color: #7c738d !important;
+}
+
+.all-text-dark * {
+  color: white !important;
 }

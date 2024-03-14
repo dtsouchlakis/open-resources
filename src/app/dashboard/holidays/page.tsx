@@ -34,7 +34,8 @@ const DnDCalendar = withDragAndDrop(Calendar);
 
 export default function Home() {
   const [events, setEvents] = useState<Event[]>([]);
-  const dialog = useDialog();
+  const dialog = useDialog<any>({ startingData: undefined });
+
   const [edit, setEdit] = useState<boolean>(false);
   const [view, setView] = useState<View>("month");
   const [indexToEdit, setIndexEdit] = useState<number | null>(null);
@@ -113,7 +114,6 @@ export default function Home() {
   async function handleSubmit() {
     console.log(getValues(), "submit");
 
-    setEdit(true);
     if (!edit) {
       try {
         let data = await axios.post("/api/holiday", {
@@ -132,7 +132,7 @@ export default function Home() {
         endDt,
         switchValueEnd,
         switchValueStart,
-        id: events[0].id,
+        id: events[indexToEdit!].id,
       });
     }
     init();

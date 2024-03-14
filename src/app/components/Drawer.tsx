@@ -52,7 +52,7 @@ export default function Drawer({
           {title}
         </h1>
         <div
-          className={`p-3 w-full flex overflow-auto h-[calc(100%-56px)] overflow-y-auto ${className}`}
+          className={`p-3 w-full flex overflow-auto h-[calc(100%-66px)] overflow-y-auto ${className}`}
         >
           {children}
         </div>
