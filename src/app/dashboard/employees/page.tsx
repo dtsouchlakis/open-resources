@@ -39,6 +39,7 @@ export default function Users() {
     },
   };
   const {
+    //TODO: Just pass whole form
     register,
     handleSubmit,
     formState: { errors },
@@ -46,7 +47,7 @@ export default function Users() {
     control,
     getValues,
     setValue,
-  } = useForm<User>({ defaultValues: { employee: {} } });
+  } = useForm<User>({ defaultValues: { employee: {} }, mode: "all" });
 
   async function init() {
     const _users = await axios.get<User[]>("/api/user", {
@@ -131,11 +132,7 @@ export default function Users() {
 
   async function onDoUnlink() {
     if (!confirmDialog.data) return;
-    const res = await axios.delete(`/api/employee/${confirmDialog.data.id}`, {
-      params: {
-        where: `id:${confirmDialog.data.id}`,
-      },
-    });
+    const res = await axios.delete(`/api/employee/${confirmDialog.data.id}`);
     confirmDialog.closeModal();
     init();
   }
@@ -161,23 +158,12 @@ export default function Users() {
   };
 
   async function onCreate() {
-    console.log(errors);
+    console.log(errors, "errors");
 
     if (Object.keys(errors).length != 0) return;
-    const _formVals = getValues();
-    let formVals = removeNulls(_formVals);
-    let userVals = {};
-
-    userVals = {
-      name: formVals?.employee?.firstName + " " + formVals?.employee?.lastName,
-      email: formVals?.employee?.email,
-    };
 
     const res = await axios.post("/api/employee", {
-      ...formVals.employee,
-      user: {
-        create: { ...userVals },
-      },
+      ...getValues().employee,
     });
 
     onResetDialog();
@@ -189,6 +175,7 @@ export default function Users() {
     createDialog.closeModal();
     editDialog.closeModal();
     linkDialog.closeModal();
+    confirmDialog.closeModal();
   }
   async function onEdit() {
     const _formVals = getValues();
@@ -229,7 +216,21 @@ export default function Users() {
       : new Promise<AxiosResponse<any, any>>((resolve, reject) => {});
   }
 
-  async function onLink() {}
+  async function onLink() {
+    if (Object.keys(errors).length != 0) return;
+    const _formVals = getValues();
+    let formVals = removeNulls(_formVals);
+    const res = await axios.post(`/api/employee/`, {
+      ...formVals.employee,
+      user: {
+        connect: {
+          id: linkDialog.data?.id,
+        },
+      },
+    });
+    onResetDialog();
+    init();
+  }
 
   const table = useMemo(() => {
     return (
@@ -252,9 +253,7 @@ export default function Users() {
         mode="save"
         onClose={() => {}}
         onSubmit={onDoUnlink}
-        onCancel={() => {
-          onResetDialog();
-        }}
+        onCancel={onResetDialog}
       >
         <div>
           <p>
@@ -322,7 +321,7 @@ export default function Users() {
         <button
           className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 h-10 px-4 rounded mt-6 relative"
           onClick={() => {
-            handleOpenDialog(undefined);
+            handleOpenDialog(createDialog.data, "create");
           }}
         >
           Add Employee

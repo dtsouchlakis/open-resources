@@ -6,6 +6,8 @@ import PrismaAdapter from "../../utils/prismaAdapter";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../api/auth/[...nextauth]/route";
 import { getSession } from "next-auth/react";
+import { randomUUID } from "crypto";
+import { User } from "@prisma/client";
 
 const adapter = new PrismaAdapter();
 // To handle a GET request to /api
@@ -30,36 +32,19 @@ export async function POST(
   res: NextResponse
 ): Promise<NextResponse> {
   const body = await req.json();
+
+  if (!body.user) {
+    body.user = {
+      create: {
+        id: randomUUID(),
+        name: body.firstName + " " + body.lastName,
+        email: body.email,
+      } as User,
+    };
+  }
   const response = await prisma.employee.create({
     data: body,
   });
 
   return NextResponse.json(response, { status: 200 });
-}
-
-export async function DELETE(
-  req: NextRequest,
-  res: NextResponse
-): Promise<NextResponse> {
-  const body = await req.json();
-  const _res = await prisma.employee.delete({
-    where: {
-      id: body.id,
-    },
-  });
-  return NextResponse.json(_res, { status: 200 });
-}
-
-export async function PUT(
-  req: NextRequest,
-  res: NextResponse
-): Promise<NextResponse> {
-  const body = await req.json();
-  const _res = await prisma.employee.update({
-    where: {
-      id: body.id,
-    },
-    data: body,
-  });
-  return NextResponse.json(_res, { status: 200 });
 }

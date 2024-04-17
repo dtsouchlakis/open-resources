@@ -24,3 +24,20 @@ export async function PUT(
   });
   return NextResponse.json(_res, { status: 200 });
 }
+
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+): Promise<NextResponse> {
+  const { id } = params;
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
+
+  const _res = await prisma.employee.delete({
+    where: {
+      id: id,
+    },
+  });
+  return NextResponse.json(_res, { status: 200 });
+}

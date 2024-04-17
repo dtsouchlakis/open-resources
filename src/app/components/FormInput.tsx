@@ -59,6 +59,7 @@ interface FormInputProps
   label?: string;
   required?: boolean;
   control?: any;
+  error?: any;
   callback?: (name: string, value: any) => Promise<AxiosResponse>;
 }
 
@@ -68,7 +69,7 @@ export default function FormInput({ inputType, ...props }: FormInputProps) {
 
     switch (inputType) {
       case "input":
-        return <input {...props} />;
+        return <input {...props} status={props.status} />;
       case "textarea":
         return <textarea {...props} />;
       case "date":
@@ -87,6 +88,7 @@ export default function FormInput({ inputType, ...props }: FormInputProps) {
         );
     }
   };
+
   return (
     <>
       {props.label && (
@@ -98,10 +100,17 @@ export default function FormInput({ inputType, ...props }: FormInputProps) {
       {props.control ? (
         <Controller
           control={props.control}
-          rules={{ required: props.required }}
+          rules={{ required: { value: !!props.required, message: "Required" } }} //TODO: Make it generic
           name={props.name ? props.name : props.label || ""}
-          render={({ field: { onChange, value, ref, ...field } }) => (
-            <>{returnEl({ ...props, onChange, value, ref, ...field })}</>
+          render={({ field, fieldState: { error }, formState }) => (
+            <>
+              {returnEl({
+                ...props,
+                error,
+                ...field,
+                formState,
+              })}
+            </>
           )}
         />
       ) : (
