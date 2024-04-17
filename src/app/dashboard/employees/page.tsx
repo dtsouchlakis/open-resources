@@ -21,7 +21,9 @@ import { useTheme } from "@/app/lib/ThemeProvider";
 
 export default function Users() {
   const [employees, setEmployees] = useState<User[]>([]);
-  const dialog = useDialog<User>({});
+  const editDialog = useDialog<User>({});
+  const linkDialog = useDialog<User>({});
+  const createDialog = useDialog<User>({});
   const confirmDialog = useDialog<Employee>({});
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const { theme } = useTheme();
@@ -56,12 +58,6 @@ export default function Users() {
     setEmployees(_users.data);
   }
 
-  const handleOpenConfirmDialog = (employee: Employee) => {
-    confirmDialog.openModal({
-      ...employee,
-    });
-  };
-
   useEffect(() => {
     init();
   }, []);
@@ -85,7 +81,6 @@ export default function Users() {
                 <PencilIcon
                   className="w-6 h-6 text-blue-500 cursor-pointer hover:text-blue-600 "
                   onClick={(item) => {
-                    console.log(params.data, "data");
                     handleOpenDialog(params.data);
                   }}
                 />
@@ -95,10 +90,12 @@ export default function Users() {
               <LinkIcon
                 className="w-6 h-6 text-blue-500 cursor-pointer"
                 onClick={(item) => {
-                  console.log(params.data, "data");
-                  params.data.employee
-                    ? handleOpenConfirmDialog(params.data.employee)
-                    : handleOpenDialog(params.data);
+                  console.log(params.data, "link");
+
+                  handleOpenDialog(
+                    params.data,
+                    params.data.employee ? "unlink" : "link"
+                  );
                 }}
               />
             </Tooltip>
@@ -142,12 +139,25 @@ export default function Users() {
     confirmDialog.closeModal();
     init();
   }
-  const handleOpenDialog = (data: User | undefined) => {
-    console.log(data, "data");
-    console.log(dialog.data);
+  const handleOpenDialog = (data: User | undefined, mode: string = "edit") => {
+    console.log(data, mode);
 
-    dialog.openModal({ ...data });
-    console.log(getValues());
+    if (mode === "edit") {
+      editDialog.openModal({ ...data });
+    } else if (mode === "link") {
+      linkDialog.openModal({ ...data });
+    } else if (mode === "create") {
+      createDialog.openModal({ ...data });
+    } else if (mode === "unlink") {
+      confirmDialog.openModal(data?.employee);
+    }
+    reset({
+      //TODO: Find a better way to handle this, preferably inside the form
+      employee: {
+        ...data?.employee,
+      },
+    });
+    console.log(editDialog.data, linkDialog.data, createDialog.data, "dialog");
   };
 
   async function onCreate() {
@@ -174,8 +184,26 @@ export default function Users() {
     init();
   }
 
+  function onResetDialog() {
+    reset();
+    createDialog.closeModal();
+    editDialog.closeModal();
+    linkDialog.closeModal();
+  }
+  async function onEdit() {
+    const _formVals = getValues();
+    let formVals = removeNulls(_formVals);
+    const res = await axios.put(
+      `/api/employee/${editDialog.data?.employee?.id}`,
+      {
+        ...formVals.employee,
+      }
+    );
+    onResetDialog();
+    init();
+  }
+
   function selectCallback(inputValue: string, name: string) {
-    console.log(inputValue, name);
     let res;
     if (name === "employee.department") {
       res = axios.get(`/api/department`, {
@@ -184,8 +212,6 @@ export default function Users() {
         },
       });
     } else if (name === "employee.manager") {
-      console.log("manager", inputValue);
-
       res = axios.get(`/api/user`, {
         params: {
           where: `name.startsWith:${inputValue}`,
@@ -202,62 +228,8 @@ export default function Users() {
       ? res
       : new Promise<AxiosResponse<any, any>>((resolve, reject) => {});
   }
-  async function onSubmit() {
-    if (!dialog.data?.id) {
-      onCreate();
-      return;
-    }
-    console.log(getValues(), "submit");
-    if (Object.keys(errors).length != 0) return;
-    const _formVals = getValues();
-    if (_formVals && _formVals?.employee?.userId) {
-      _formVals.employee.userId = undefined;
-    }
-    let formVals = removeNulls(_formVals);
 
-    const res = await axios.put(
-      "/api/user",
-      {
-        employee: {
-          upsert: {
-            create: {
-              ...formVals,
-            },
-
-            update: {
-              ...formVals,
-            },
-          },
-        },
-      },
-
-      {
-        params: {
-          where: `id:${dialog.data?.id}`,
-        },
-      }
-    );
-
-    onResetDialog();
-    init();
-  }
-
-  useEffect(() => {
-    if (!dialog.data) return;
-    console.log(dialog.data, "dialog");
-
-    reset({
-      ...dialog.data,
-    });
-  }, [dialog.data]);
-
-  function onResetDialog() {
-    dialog.data = undefined;
-    dialog.closeModal();
-    confirmDialog.closeModal();
-    reset({});
-    console.log(dialog.data, "dialog.data");
-  }
+  async function onLink() {}
 
   const table = useMemo(() => {
     return (
@@ -275,7 +247,7 @@ export default function Users() {
     <Drawer className="flex w-full justify-center ">
       <CustomDialog
         dialogHandler={confirmDialog}
-        className="dark:bg-gray-800"
+        className="dark:bg-gray-800 bg-white w-full text-black dark:text-white  transform rounded-2xl  p-6 text-left align-middle shadow-xl transition-all"
         title="Are you sure?"
         mode="save"
         onClose={() => {}}
@@ -293,18 +265,54 @@ export default function Users() {
         </div>
       </CustomDialog>
       <CustomDialog
-        dialogHandler={dialog}
+        dialogHandler={editDialog}
         title="link employee"
         mode="save"
         size="4xl"
-        className="bg-gray-800 w-full  transform rounded-2xl  p-6 text-left align-middle shadow-xl transition-all"
+        className="dark:bg-gray-800 bg-white w-full text-black dark:text-white  transform rounded-2xl  p-6 text-left align-middle shadow-xl transition-all"
         onClose={onResetDialog}
-        onSubmit={onSubmit}
+        onSubmit={onEdit}
         onCancel={onResetDialog}
       >
         <EmployeeLinkForm
-          dialog={dialog}
-          selectedUser={dialog.data}
+          dialog={editDialog}
+          selectedUser={editDialog.data}
+          control={control}
+          errors={errors}
+          fetchCallback={selectCallback}
+        />
+      </CustomDialog>
+      <CustomDialog
+        dialogHandler={linkDialog}
+        title="link employee"
+        mode="save"
+        size="4xl"
+        className="dark:bg-gray-800 bg-white w-full text-black dark:text-white  transform rounded-2xl  p-6 text-left align-middle shadow-xl transition-all"
+        onClose={onResetDialog}
+        onSubmit={onLink}
+        onCancel={onResetDialog}
+      >
+        <EmployeeLinkForm
+          dialog={linkDialog}
+          selectedUser={linkDialog.data}
+          control={control}
+          errors={errors}
+          fetchCallback={selectCallback}
+        />
+      </CustomDialog>
+      <CustomDialog
+        dialogHandler={createDialog}
+        title="link employee"
+        mode="save"
+        size="4xl"
+        className="dark:bg-gray-800 bg-white w-full text-black dark:text-white  transform rounded-2xl  p-6 text-left align-middle shadow-xl transition-all"
+        onClose={onResetDialog}
+        onSubmit={onCreate}
+        onCancel={onResetDialog}
+      >
+        <EmployeeLinkForm
+          dialog={createDialog}
+          selectedUser={createDialog.data}
           control={control}
           errors={errors}
           fetchCallback={selectCallback}

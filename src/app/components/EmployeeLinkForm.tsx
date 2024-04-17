@@ -1,6 +1,7 @@
 import { AxiosResponse } from "axios";
 import FormInput from "./FormInput";
-
+import { useEffect } from "react";
+//TODO: Refactor and make more modular
 export default function EmployeeLinkForm({
   dialog,
   selectedUser,
@@ -14,6 +15,9 @@ export default function EmployeeLinkForm({
   errors: any;
   fetchCallback?: (name: string, inputValue: any) => Promise<AxiosResponse>;
 }) {
+  useEffect(() => {
+    console.log(dialog, selectedUser, ">SAdasd");
+  }, [dialog]);
   return (
     <div className="w-full h-full text-black dark:text-white">
       <div className="w-full font-bold h-12 flex flex-row items-center justify-between text-black border-1 border-b border-gray-300">

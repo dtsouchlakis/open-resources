@@ -114,7 +114,7 @@ export default function Home() {
   async function handleSubmit() {
     console.log(getValues(), "submit");
 
-    if (!edit) {
+    if (!dialog.data) {
       try {
         let data = await axios.post("/api/holiday", {
           startDt,

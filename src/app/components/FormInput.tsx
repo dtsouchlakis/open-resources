@@ -64,6 +64,8 @@ interface FormInputProps
 
 export default function FormInput({ inputType, ...props }: FormInputProps) {
   const returnEl = (props: any) => {
+    console.log(props, inputType);
+
     switch (inputType) {
       case "input":
         return <input {...props} />;
