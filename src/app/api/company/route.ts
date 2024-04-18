@@ -14,13 +14,11 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   const { where, orderBy, include, skip, take, cursor } =
     await adapter.parseQuery(searchParams);
 
-  const data = await prisma.holiday.findMany({
+  const data = await prisma.company.findMany({
     where,
-    orderBy,
     include,
     skip,
     take,
-    cursor,
   });
 
   return NextResponse.json(data, { status: 200 });
@@ -31,33 +29,12 @@ export async function POST(
   req: NextRequest,
   res: NextResponse
 ): Promise<NextResponse> {
-  const session = await getServerSession(authOptions);
-
   const body = await req.json();
-  const userId = req.credentials;
-  const { startDt, endDt, switchValueEnd, switchValueStart, title } = body;
-
-  let days =
-    (new Date(endDt).getTime() - new Date(startDt).getTime()) /
-    (1000 * 60 * 60 * 24);
-
-  if (switchValueStart || switchValueEnd) {
-    days -= 0.5;
-  } else {
-    days -= 1;
-  }
-  const _res = await prisma.holiday.create({
-    data: {
-      dateFrom: startDt,
-      dateTo: endDt,
-      days,
-      requestedByUser: { connect: { id: session?.user?.id } },
-      requestedAt: new Date(),
-      description: title ? title : `${session?.user?.name} - PTO`,
-    },
+  const response = await prisma.company.create({
+    data: body,
   });
 
-  return NextResponse.json(_res, { status: 200 });
+  return NextResponse.json(response, { status: 200 });
 }
 
 export async function DELETE(
@@ -65,7 +42,7 @@ export async function DELETE(
   res: NextResponse
 ): Promise<NextResponse> {
   const body = await req.json();
-  const _res = await prisma.holiday.delete({
+  const _res = await prisma.company.delete({
     where: {
       id: body.id,
     },
@@ -78,28 +55,11 @@ export async function PUT(
   res: NextResponse
 ): Promise<NextResponse> {
   const body = await req.json();
-  const { startDt, endDt, switchValueEnd, switchValueStart, title } = body;
-
-  let days =
-    (new Date(endDt).getTime() - new Date(startDt).getTime()) /
-    (1000 * 60 * 60 * 24);
-
-  if (switchValueStart || switchValueEnd) {
-    days -= 0.5;
-  } else {
-    days -= 1;
-  }
-  const _res = await prisma.holiday.update({
+  const _res = await prisma.company.update({
     where: {
       id: body.id,
     },
-    data: {
-      dateFrom: startDt,
-      dateTo: endDt,
-      days,
-      requestedAt: new Date(),
-    },
+    data: body,
   });
-
   return NextResponse.json(_res, { status: 200 });
 }

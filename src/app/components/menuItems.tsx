@@ -16,8 +16,8 @@ export const menuItems = [
     icon: <HomeIcon />,
   },
   {
-    name: "Users",
-    href: "/dashboard/users",
+    name: "Employees",
+    href: "/dashboard/employees",
     icon: <UsersIcon />,
   },
   {

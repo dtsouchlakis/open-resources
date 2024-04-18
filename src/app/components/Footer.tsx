@@ -14,7 +14,7 @@ export default function Footer() {
   }
 
   return (
-    <footer className="z-50 w-full h-[40px] relative bottom-0 bg-blue-800 border-gray-200 px-2 sm:px-4 py-1.5 rounded dark:bg-gray-800 flex flex-row justify-between items-center">
+    <footer className="z-10 w-full h-[40px] relative bottom-0 bg-blue-800 border-gray-200 px-2 sm:px-4 py-1.5 rounded dark:bg-gray-800 flex flex-row justify-between items-center">
       <p className="font-medium">Copyright © 2024</p>
       <div>
         <ul className="flex justify-center items-center flex-row space-x-5">

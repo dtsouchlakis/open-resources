@@ -3,23 +3,31 @@ import { Fragment, useState } from "react";
 
 type mode = "save" | "okay";
 
-export function useDialog() {
+export function useDialog<T>({
+  startingData,
+}: {
+  startingData?: T | undefined;
+}) {
   const [isOpen, setIsOpen] = useState(false);
+  const [data, setData] = useState<T | undefined>(startingData);
 
   function closeModal() {
     setIsOpen(false);
   }
 
-  function openModal() {
+  function openModal(data?: T | undefined) {
     setIsOpen(true);
+    data && setData(data);
   }
 
-  return { isOpen, closeModal, openModal };
+  return { isOpen, closeModal, openModal, data };
 }
 export default function MyModal({
   title,
+  size,
   children,
   mode,
+  className,
   dialogHandler,
   onSubmit,
   onCancel,
@@ -27,12 +35,28 @@ export default function MyModal({
   onClose,
 }: {
   children: React.ReactNode;
+  size?:
+    | "xs"
+    | "sm"
+    | "md"
+    | "lg"
+    | "xl"
+    | "2xl"
+    | "3xl"
+    | "4xl"
+    | "5xl"
+    | "6xl"
+    | "7xl"
+    | "8xl"
+    | "9xl";
   title: string;
   mode: mode;
+  className?: string;
   dialogHandler: {
     isOpen: boolean;
     closeModal: () => void;
-    openModal: () => void;
+    openModal: (data?: any) => void;
+    data?: any;
   };
   onSubmit?: () => void;
   onClose: () => void;
@@ -42,7 +66,7 @@ export default function MyModal({
   return (
     <>
       <Transition appear show={dialogHandler.isOpen} as={Fragment}>
-        <Dialog as="div" className="relative z-50" onClose={onClose}>
+        <Dialog as="div" className="relative z-10" onClose={onClose}>
           <Transition.Child
             as={Fragment}
             enter="ease-out duration-300"
@@ -66,7 +90,13 @@ export default function MyModal({
                 leaveFrom="opacity-100 scale-100"
                 leaveTo="opacity-0 scale-95"
               >
-                <Dialog.Panel className="w-full max-w-md transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all">
+                <Dialog.Panel
+                  className={`${
+                    className
+                      ? className
+                      : "w-full  transform rounded-2xl bg-white p-6 text-left align-middle shadow-xl transition-all"
+                  } ${size ? `max-w-${size}` : "max-w-md"}`}
+                >
                   <Dialog.Title
                     as="h3"
                     className="text-lg font-medium leading-6 text-gray-900"

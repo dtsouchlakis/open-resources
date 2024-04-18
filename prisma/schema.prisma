@@ -5,6 +5,11 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator prismaClassGenerator {
+  provider = "prisma-class-generator"
+  dryRun   = "false"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
@@ -78,7 +83,7 @@ model VerificationToken {
 }
 
 model File {
-  id         String    @id
+  id         String    @id @default(cuid())
   name       String
   createdAt  DateTime  @default(now())
   updatedAt  DateTime  @updatedAt
@@ -116,7 +121,7 @@ model Holiday {
 }
 
 model Training {
-  id          String   @id
+  id          String   @id @default(cuid())
   name        String
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
@@ -132,50 +137,49 @@ model Training {
 }
 
 model Employee {
-  id               String     @id
-  name             String
-  createdAt        DateTime   @default(now())
-  updatedAt        DateTime   @updatedAt
-  user             User       @relation(fields: [userId], references: [id])
-  userId           String     @unique
+  id               String      @id @default(cuid())
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+  user             User?       @relation(fields: [userId], references: [id]) //TODO: if no user exists when making the employee, create temp
   email            String
   firstName        String
   lastName         String
   dateOfBirth      DateTime
-  gender           String
-  title            String
+  gender           String?
+  title            String?
   hiredAt          DateTime
-  lastDayWorkedAt  DateTime
+  lastDayWorkedAt  DateTime?
   mobile           String
-  phone            String
-  address          String
-  positionTitle    String
-  department       Department @relation(fields: [departmentId], references: [id])
-  departmentId     String
-  manager          Employee   @relation(name: "Subordinate", fields: [subordinateId], references: [id])
-  managerId        String
-  image            String
-  bio              String
+  phone            String?
+  address          String?
+  positionTitle    String?
+  department       Department? @relation(fields: [departmentId], references: [id])
+  departmentId     String?
+  manager          Employee?   @relation(name: "Subordinate", fields: [subordinateId], references: [id])
+  managerId        String?
+  image            String?
+  bio              String?
   holidayAllowance Int?
-  subordinate      Employee?  @relation(name: "Subordinate")
-  subordinateId    String     @unique
-  Company          Company?   @relation(fields: [companyid], references: [id])
+  subordinate      Employee?   @relation(name: "Subordinate")
+  subordinateId    String?     @unique
+  Company          Company?    @relation(fields: [companyid], references: [id])
   companyid        String?
+  userId           String?     @unique
 
-  @@index([userId, email, firstName, lastName, departmentId, managerId, subordinateId])
+  @@index([email, firstName, lastName, departmentId, managerId, subordinateId])
 }
 
 model Department {
-  id             String     @id
-  departmentName String
-  createdAt      DateTime   @default(now())
-  updatedAt      DateTime   @updatedAt
-  users          User[]
-  employees      Employee[]
-  Company        Company?   @relation(fields: [companyid], references: [id])
-  companyid      String?
+  id        String     @id
+  name      String
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  users     User[]
+  employees Employee[]
+  Company   Company?   @relation(fields: [companyid], references: [id])
+  companyid String?
 
-  @@index([departmentName])
+  @@index([name])
 }
 
 model Company {
