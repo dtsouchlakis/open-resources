@@ -1,12 +1,22 @@
+import { Prisma } from "@prisma/client";
+import { DefaultArgs, Extensions } from "@prisma/client/runtime/library";
+
 export default class PrismaAdapter {
-  async parseQuery(query: URLSearchParams) {
+  async parseQuery<T>(query: URLSearchParams) {
     const where = this.parseWhere(query);
     const orderBy = query.has("orderBy") ? query.get("orderBy") : undefined;
     const include = this.parseInclude(query);
     const skip = query.has("skip") ? parseInt(query.get("skip")!) : undefined;
     const take = query.has("take") ? parseInt(query.get("take")!) : undefined;
     const cursor = query.has("cursor") ? query.get("cursor")! : undefined;
-    return { where, orderBy, include, skip, take, cursor };
+    return {
+      where,
+      orderBy,
+      include,
+      skip,
+      take,
+      cursor,
+    } as T;
   }
 
   parseWhere(query: URLSearchParams) {

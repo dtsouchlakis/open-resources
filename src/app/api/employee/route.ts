@@ -7,14 +7,14 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "../../api/auth/[...nextauth]/route";
 import { getSession } from "next-auth/react";
 import { randomUUID } from "crypto";
-import { User } from "@prisma/client";
+import { Prisma, User } from "@prisma/client";
 
 const adapter = new PrismaAdapter();
 // To handle a GET request to /api
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(req.url);
   const { where, orderBy, include, skip, take, cursor } =
-    await adapter.parseQuery(searchParams);
+    await adapter.parseQuery<Prisma.EmployeeFindManyArgs>(searchParams);
 
   const data = await prisma.employee.findMany({
     where,

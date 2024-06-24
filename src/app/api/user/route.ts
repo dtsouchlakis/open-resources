@@ -3,13 +3,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import prisma from "../../lib/prisma";
 import PrismaAdapter from "../../utils/prismaAdapter";
+import { Prisma } from "@prisma/client";
 
 const adapter = new PrismaAdapter();
 // To handle a GET request to /api
 export async function GET(req: NextRequest): Promise<NextResponse> {
   const { searchParams } = new URL(req.url);
   const { where, orderBy, include, skip, take, cursor } =
-    await adapter.parseQuery(searchParams);
+    await adapter.parseQuery<Prisma.UserFindManyArgs>(searchParams);
 
   const data = await prisma.user.findMany({
     where,
@@ -21,30 +22,14 @@ export async function GET(req: NextRequest): Promise<NextResponse> {
   return NextResponse.json(data, { status: 200 });
 }
 
-export async function DELETE(
+export async function POST(
   req: NextRequest,
   res: NextResponse
 ): Promise<NextResponse> {
   const body = await req.json();
-  const _res = await prisma.user.delete({
-    where: {
-      id: body.id,
-    },
-  });
-  return NextResponse.json(_res, { status: 200 });
-}
-
-export async function PUT(req: NextRequest) {
-  const { searchParams } = new URL(req.url);
-  const body = await req.json();
-  const { where, orderBy, include, skip, take, cursor } =
-    await adapter.parseQuery(searchParams);
-  const response = await prisma.user.update({
-    where: where,
+  const response = await prisma.user.create({
     data: body,
   });
 
-  return NextResponse.json(response, {
-    status: 200,
-  });
+  return NextResponse.json(response, { status: 200 });
 }
